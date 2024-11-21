@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            height: 100vh;
+        }
+        .login-container {
+            max-width: 360px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-control {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+        }
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #0d6efd;
+        }
+        .spinner {
+            display: none;
+        }
+        .error {
+            display: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex align-items-center justify-content-center min-vh-100">
+        <div class="login-container p-4">
+            <h4 class="text-center mb-4">Sign In</h4>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <input type="email" class="form-control" placeholder="Email" required>
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <span class="spinner-border spinner-border-sm spinner me-1"></span>
+                    <span class="btn-text">Login</span>
+                </button>
+                <div class="error text-danger mt-3 text-center"></div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('loginForm');
+        const spinner = document.querySelector('.spinner');
+        const btnText = document.querySelector('.btn-text');
+        const error = document.querySelector('.error');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const [email, password] = [
+                form.querySelector('input[type="email"]').value,
+                form.querySelector('input[type="password"]').value
+            ];
+
+            try {
+                showLoading(true);
+                const response = await login(email, password);
+                if (response.success) {
+                    localStorage.setItem('token', response.token);
+                    window.location.href = '/dashboard';
+                }
+            } catch (err) {
+                error.textContent = err.message;
+                error.style.display = 'block';
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        function showLoading(isLoading) {
+            const btn = form.querySelector('button');
+            spinner.style.display = isLoading ? 'inline-block' : 'none';
+            btn.disabled = isLoading;
+            btnText.textContent = isLoading ? 'Signing in...' : 'Login';
+            error.style.display = 'none';
+        }
+
+        async function login(email, password) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (email === 'test@example.com' && password === 'password123') {
+                return { success: true, token: 'mock_token' };
+            }
+            throw new Error('Invalid credentials');
+        }
+    </script>
+</body>
+</html>
